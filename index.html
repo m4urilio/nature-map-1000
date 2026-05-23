@@ -378,22 +378,23 @@
   }
   .quiz-btns {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
   .quiz-btn {
-    padding: 14px;
+    padding: 13px 16px;
     border-radius: 10px;
-    font-size: .95rem;
-    font-weight: 700;
+    font-size: .9rem;
+    font-weight: 600;
     border: 2px solid var(--border);
     background: var(--white);
     cursor: pointer;
+    text-align: left;
+    color: var(--text);
     transition: background .15s, border-color .15s, color .15s;
+    line-height: 1.4;
   }
-  .quiz-btn:hover { border-color: var(--purple); color: var(--purple); }
-  .quiz-btn.sim  { border-color: var(--purple); background: var(--purple-light); color: var(--purple); }
-  .quiz-btn.nao  { border-color: var(--gray-mid); color: var(--gray); }
+  .quiz-btn:hover { border-color: var(--purple); background: var(--purple-light); color: var(--purple); }
 
   /* RESULT */
   .result-icon {
@@ -453,10 +454,7 @@
     </div>
     <div class="quiz-counter" id="quiz-counter">Pergunta 1 de 10</div>
     <div class="quiz-question" id="quiz-question"></div>
-    <div class="quiz-btns" id="quiz-btns">
-      <button class="quiz-btn sim" onclick="answerQuiz()">Sim</button>
-      <button class="quiz-btn nao" onclick="answerQuiz()">Não</button>
-    </div>
+    <div class="quiz-btns" id="quiz-btns"></div>
     <!-- RESULT (hidden initially) -->
     <div id="quiz-result" style="display:none">
       <div class="result-icon">⚠️</div>
@@ -611,23 +609,58 @@
 <script>
   // QUIZ
   const questions = [
-    'Você tem dificuldade em ter ou manter uma ereção satisfatória?',
-    'Seu desejo sexual diminuiu nos últimos meses?',
-    'Você acorda sem ereção matinal com frequência?',
-    'Você se sente constantemente cansado, mesmo dormindo bem?',
-    'Percebe queda na massa muscular sem mudar sua rotina?',
-    'Tem dificuldade de concentração ou sente "névoa mental"?',
-    'Sua resistência física durante a relação sexual diminuiu?',
-    'Você sente mudanças de humor, irritabilidade ou desmotivação?',
-    'Tem mais de 35 anos e nunca verificou seus níveis de testosterona?',
-    'Já tentou soluções para esses problemas sem resultado satisfatório?',
+    {
+      q: 'Com que frequência você tem dificuldade em manter uma ereção?',
+      opts: ['Nunca / raramente', 'Às vezes (1-2x por mês)', 'Com frequência (1-2x por semana)', 'Quase sempre ou sempre']
+    },
+    {
+      q: 'Como está seu nível de desejo sexual atualmente?',
+      opts: ['Normal, sem alterações', 'Um pouco reduzido', 'Bastante reduzido', 'Praticamente inexistente']
+    },
+    {
+      q: 'Com que frequência você acorda com ereção matinal?',
+      opts: ['Todo dia', 'Algumas vezes por semana', 'Raramente', 'Nunca acontece mais']
+    },
+    {
+      q: 'Como você descreveria seu nível de energia no dia a dia?',
+      opts: ['Ótimo, me sinto disposto', 'Razoável, cansaço eventual', 'Baixo, cansaço frequente', 'Muito baixo, sem ânimo nenhum']
+    },
+    {
+      q: 'Você percebe alguma mudança na sua massa muscular?',
+      opts: ['Não, estou bem', 'Perdi um pouco, mas acho normal', 'Perdi bastante sem mudar minha rotina', 'Tenho muita dificuldade de ganhar massa']
+    },
+    {
+      q: 'Como estão sua concentração e memória?',
+      opts: ['Excelentes', 'Às vezes fico disperso', 'Frequentemente com névoa mental', 'Muito difícil me concentrar']
+    },
+    {
+      q: 'Como você avalia sua resistência física durante a relação sexual?',
+      opts: ['Ótima, sem problemas', 'Razoável, mas poderia ser melhor', 'Baixa, canso com facilidade', 'Muito baixa, é um problema real']
+    },
+    {
+      q: 'Como está seu humor e motivação no dia a dia?',
+      opts: ['Estável e positivo', 'Oscila um pouco', 'Irritável e desmotivado com frequência', 'Muito afetado, sinto ansiedade ou tristeza']
+    },
+    {
+      q: 'Qual é a sua faixa etária?',
+      opts: ['Menos de 30 anos', '30 a 40 anos', '40 a 50 anos', 'Mais de 50 anos']
+    },
+    {
+      q: 'Você já tentou alguma solução para esses problemas?',
+      opts: ['Nunca precisei de ajuda', 'Tentei exercícios e dieta, sem resultado', 'Tentei suplementos, sem resultado consistente', 'Tentei medicamentos, mas quero algo natural']
+    },
   ];
   let currentQ = 0;
 
   function renderQuestion() {
-    document.getElementById('quiz-question').textContent = questions[currentQ];
+    const data = questions[currentQ];
+    document.getElementById('quiz-question').textContent = data.q;
     document.getElementById('quiz-counter').textContent = 'Pergunta ' + (currentQ + 1) + ' de ' + questions.length;
     document.getElementById('quiz-fill').style.width = ((currentQ + 1) / questions.length * 100) + '%';
+    const btns = document.getElementById('quiz-btns');
+    btns.innerHTML = data.opts.map((opt, i) =>
+      `<button class="quiz-btn" onclick="answerQuiz()">${opt}</button>`
+    ).join('');
   }
 
   function answerQuiz() {
