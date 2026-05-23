@@ -356,7 +356,7 @@
 </header>
 
 <!-- PROGRESS BAR -->
-<div class="progress-wrap" style="display:none">
+<div class="progress-wrap">
   <div class="progress-steps">
     <div class="step-dot active" id="dot-1">
       <div class="dot">1</div>
@@ -420,7 +420,7 @@
       </div>
     </div>
 
-    <button class="btn-green" id="btn-step1" onclick="finalizar()" disabled>Continuar Pedido</button>
+    <button class="btn-green" id="btn-step1" onclick="goTo(2)" disabled>Continuar Pedido</button>
 
     <div class="trust">
       <span class="trust-item">
@@ -438,6 +438,60 @@
     </div>
   </div>
 
+  <!-- STEP 2: ENDEREÇO -->
+  <div class="step" id="step-2">
+    <div class="card-title">Endereço de entrega</div>
+    <div class="card-subtitle">Preencha seus dados para enviarmos seu pedido.</div>
+
+    <div class="field">
+      <label>CEP</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="cep" placeholder="00000-000" maxlength="9" oninput="maskCep(this)" style="flex:1;margin:0">
+        <button type="button" onclick="conferirFrete()" style="white-space:nowrap;padding:12px 14px;background:var(--green);color:#fff;font-size:.8rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;flex-shrink:0">CONFERIR FRETE</button>
+      </div>
+      <div id="frete-msg" style="display:none;margin-top:8px;font-size:.85rem;font-weight:700;color:var(--green)">✓ Entrega grátis em 7 dias</div>
+    </div>
+    <div class="field">
+      <label>Rua / Logradouro</label>
+      <input type="text" id="rua" placeholder="Ex: Rua das Flores">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Número</label>
+        <input type="text" id="numero" placeholder="123">
+      </div>
+      <div class="field">
+        <label>Complemento</label>
+        <input type="text" id="complemento" placeholder="Apto, Bloco...">
+      </div>
+    </div>
+    <div class="field">
+      <label>Bairro</label>
+      <input type="text" id="bairro" placeholder="Ex: Centro">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Cidade</label>
+        <input type="text" id="cidade" placeholder="São Paulo">
+      </div>
+      <div class="field">
+        <label>Estado</label>
+        <select id="estado">
+          <option value="">UF</option>
+          <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+          <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+          <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+          <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+          <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+          <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+          <option selected>SP</option><option>SE</option><option>TO</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn-green" onclick="finalizar()">Finalizar Pedido</button>
+    <button class="btn-back" onclick="goTo(1)">Voltar</button>
+  </div>
 
 </div><!-- /card -->
 
