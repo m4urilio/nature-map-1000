@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nature Map-1000 — Pedido</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --purple:       #6B3FA0;
+    --purple-dark:  #4E2D78;
+    --purple-light: #F3EEFF;
+    --green:        #2E9E5B;
+    --green-dark:   #1F7A42;
+    --gray:         #6B7280;
+    --gray-light:   #F4F4F6;
+    --gray-mid:     #D1D5DB;
+    --border:       #E5E7EB;
+    --text:         #1A1A2E;
+    --text-mid:     #4B5563;
+    --white:        #FFFFFF;
+    --radius:       12px;
+    --shadow:       0 4px 24px rgba(107,63,160,.10);
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--gray-light);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* HEADER */
+  header {
+    width: 100%;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logo {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--purple);
+    letter-spacing: -.5px;
+  }
+  .logo span { color: var(--green); }
+
+  /* PROGRESS */
+  .progress-wrap {
+    width: 100%;
+    max-width: 520px;
+    padding: 28px 20px 0;
+  }
+  .progress-steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .step-dot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    position: relative;
+  }
+  .step-dot::after {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: var(--gray-mid);
+    z-index: 0;
+  }
+  .step-dot:last-child::after { display: none; }
+  .dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--gray-mid);
+    color: var(--white);
+    font-size: .75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    transition: background .3s;
+  }
+  .step-dot.active .dot  { background: var(--purple); }
+  .step-dot.done .dot    { background: var(--green); }
+  .step-dot.done::after  { background: var(--green); }
+  .step-label {
+    font-size: .68rem;
+    color: var(--gray);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .step-dot.active .step-label { color: var(--purple); font-weight: 700; }
+  .step-dot.done .step-label   { color: var(--green); }
+
+  /* CARD */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 32px 28px;
+    width: 100%;
+    max-width: 520px;
+    margin: 20px 20px 40px;
+  }
+
+  .card-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .card-subtitle {
+    font-size: .9rem;
+    color: var(--text-mid);
+    margin-bottom: 24px;
+  }
+
+  /* PRODUCT IMAGE PLACEHOLDER */
+  .product-img {
+    width: 140px;
+    height: 200px;
+    background: linear-gradient(135deg, var(--purple-light) 0%, #ddd8f5 100%);
+    border-radius: 10px;
+    border: 2px dashed var(--purple);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 auto 28px;
+  }
+  .product-img svg { opacity: .35; }
+  .product-img span {
+    font-size: .7rem;
+    color: var(--purple);
+    opacity: .6;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+
+  /* QUANTITY OPTIONS */
+  .qty-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .qty-card {
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 12px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    text-align: center;
+    position: relative;
+  }
+  .qty-card:hover { border-color: var(--purple); background: var(--purple-light); }
+  .qty-card.selected { border-color: var(--purple); background: var(--purple-light); }
+  .qty-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    color: var(--purple);
+    font-weight: 800;
+    font-size: .85rem;
+  }
+  .qty-badge {
+    display: inline-block;
+    background: var(--purple);
+    color: var(--white);
+    font-size: .65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+  }
+  .qty-badge.best { background: var(--green); }
+  .qty-label {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .qty-desc {
+    font-size: .75rem;
+    color: var(--text-mid);
+    line-height: 1.4;
+  }
+  .qty-price {
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--purple);
+    margin-top: 8px;
+  }
+
+  /* FORM FIELDS */
+  .field { margin-bottom: 18px; }
+  .field label {
+    display: block;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--text-mid);
+    margin-bottom: 6px;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: .95rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color .2s;
+    background: var(--white);
+  }
+  .field input:focus, .field select:focus { border-color: var(--purple); }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* SUMMARY BOX */
+  .summary-box {
+    background: var(--purple-light);
+    border: 1.5px solid #d4b8f5;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 22px;
+  }
+  .summary-box .summary-title {
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--purple);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 10px;
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: .88rem;
+    color: var(--text-mid);
+    margin-bottom: 4px;
+  }
+  .summary-row.total {
+    font-weight: 800;
+    color: var(--text);
+    font-size: .95rem;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #d4b8f5;
+  }
+
+  /* BUTTONS */
+  .btn-green {
+    width: 100%;
+    padding: 15px;
+    background: var(--green);
+    color: var(--white);
+    font-size: 1rem;
+    font-weight: 800;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background .2s, transform .1s;
+    letter-spacing: .3px;
+  }
+  .btn-green:hover { background: var(--green-dark); }
+  .btn-green:active { transform: scale(.98); }
+  .btn-green:disabled {
+    background: var(--gray-mid);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-back {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: var(--gray);
+    font-size: .88rem;
+    font-weight: 600;
+    border: 1.5px solid var(--gray-mid);
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: border-color .2s, color .2s;
+  }
+  .btn-back:hover { border-color: var(--purple); color: var(--purple); }
+
+  /* TRUST BADGES */
+  .trust {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .72rem;
+    color: var(--gray);
+    font-weight: 500;
+  }
+  .trust-item svg { color: var(--green); flex-shrink: 0; }
+
+  /* STEP VISIBILITY */
+  .step { display: none; }
+  .step.active { display: block; }
+
+  @media (max-width: 480px) {
+    .card { padding: 24px 18px; margin: 16px 12px 32px; }
+    .qty-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .field-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Nature <span>Map</span>-1000</div>
+</header>
+
+<!-- PROGRESS BAR -->
+<div class="progress-wrap">
+  <div class="progress-steps">
+    <div class="step-dot active" id="dot-1">
+      <div class="dot">1</div>
+      <span class="step-label">Quantidade</span>
+    </div>
+    <div class="step-dot" id="dot-2">
+      <div class="dot">2</div>
+      <span class="step-label">Endereço</span>
+    </div>
+    <div class="step-dot" id="dot-3">
+      <div class="dot">3</div>
+      <span class="step-label">Contato</span>
+    </div>
+  </div>
+</div>
+
+<!-- CARD -->
+<div class="card">
+
+  <!-- STEP 1: QUANTIDADE -->
+  <div class="step active" id="step-1">
+    <div class="product-img">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6B3FA0" stroke-width="1.5">
+        <rect x="3" y="3" width="18" height="18" rx="3"/>
+        <path d="M3 9h18M9 21V9"/>
+      </svg>
+      <span>Foto do produto</span>
+    </div>
+
+    <div class="card-title">Escolha sua quantidade</div>
+    <div class="card-subtitle">Selecione o kit ideal para você e aproveite os descontos.</div>
+
+    <div class="qty-grid">
+      <div class="qty-card" data-qty="1" data-price="97,00" onclick="selectQty(this)">
+        <span class="qty-badge">Starter</span>
+        <div class="qty-label">1 Frasco</div>
+        <div class="qty-desc">30 dias de uso</div>
+        <div class="qty-price">R$ 97,00</div>
+      </div>
+      <div class="qty-card" data-qty="2" data-price="174,00" onclick="selectQty(this)">
+        <span class="qty-badge">Popular</span>
+        <div class="qty-label">2 Frascos</div>
+        <div class="qty-desc">60 dias de uso</div>
+        <div class="qty-price">R$ 174,00</div>
+      </div>
+      <div class="qty-card" data-qty="3" data-price="237,00" onclick="selectQty(this)">
+        <span class="qty-badge best">Recomendado</span>
+        <div class="qty-label">3 Frascos</div>
+        <div class="qty-desc">90 dias de uso</div>
+        <div class="qty-price">R$ 237,00</div>
+      </div>
+      <div class="qty-card" data-qty="6" data-price="420,00" onclick="selectQty(this)">
+        <span class="qty-badge best">Melhor valor</span>
+        <div class="qty-label">6 Frascos</div>
+        <div class="qty-desc">180 dias de uso</div>
+        <div class="qty-price">R$ 420,00</div>
+      </div>
+    </div>
+
+    <button class="btn-green" id="btn-step1" onclick="goTo(2)" disabled>Continuar</button>
+
+    <div class="trust">
+      <span class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Compra segura
+      </span>
+      <span class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        Frete grátis
+      </span>
+      <span class="trust-item">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Garantia de 30 dias
+      </span>
+    </div>
+  </div>
+
+  <!-- STEP 2: ENDEREÇO -->
+  <div class="step" id="step-2">
+    <div class="card-title">Endereço de entrega</div>
+    <div class="card-subtitle">Preencha seus dados para enviarmos seu pedido.</div>
+
+    <div class="summary-box">
+      <div class="summary-title">Resumo do pedido</div>
+      <div class="summary-row">
+        <span id="summary-qty-label">—</span>
+        <span id="summary-qty-price">—</span>
+      </div>
+      <div class="summary-row"><span>Frete</span><span style="color:var(--green);font-weight:700">Grátis</span></div>
+      <div class="summary-row total">
+        <span>Total</span>
+        <span id="summary-total">—</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>CEP</label>
+      <input type="text" id="cep" placeholder="00000-000" maxlength="9" oninput="maskCep(this)">
+    </div>
+    <div class="field">
+      <label>Rua / Logradouro</label>
+      <input type="text" id="rua" placeholder="Ex: Rua das Flores">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Número</label>
+        <input type="text" id="numero" placeholder="123">
+      </div>
+      <div class="field">
+        <label>Complemento</label>
+        <input type="text" id="complemento" placeholder="Apto, Bloco...">
+      </div>
+    </div>
+    <div class="field">
+      <label>Bairro</label>
+      <input type="text" id="bairro" placeholder="Ex: Centro">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Cidade</label>
+        <input type="text" id="cidade" placeholder="São Paulo">
+      </div>
+      <div class="field">
+        <label>Estado</label>
+        <select id="estado">
+          <option value="">UF</option>
+          <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+          <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+          <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+          <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+          <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+          <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+          <option selected>SP</option><option>SE</option><option>TO</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn-green" onclick="goTo(3)">Continuar</button>
+    <button class="btn-back" onclick="goTo(1)">Voltar</button>
+  </div>
+
+  <!-- STEP 3: CONTATO -->
+  <div class="step" id="step-3">
+    <div class="card-title">Seus dados de contato</div>
+    <div class="card-subtitle">Usaremos apenas para confirmar seu pedido.</div>
+
+    <div class="summary-box">
+      <div class="summary-title">Resumo do pedido</div>
+      <div class="summary-row">
+        <span id="summary-qty-label2">—</span>
+        <span id="summary-qty-price2">—</span>
+      </div>
+      <div class="summary-row"><span>Frete</span><span style="color:var(--green);font-weight:700">Grátis</span></div>
+      <div class="summary-row total">
+        <span>Total</span>
+        <span id="summary-total2">—</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Nome completo</label>
+      <input type="text" id="nome" placeholder="Seu nome">
+    </div>
+    <div class="field">
+      <label>WhatsApp / Telefone</label>
+      <input type="tel" id="telefone" placeholder="(11) 99999-9999" maxlength="15" oninput="maskPhone(this)">
+    </div>
+
+    <button class="btn-green" onclick="finalizar()">Finalizar pedido</button>
+    <button class="btn-back" onclick="goTo(2)">Voltar</button>
+  </div>
+
+</div><!-- /card -->
+
+<script>
+  let selectedQty = null;
+  let selectedPrice = null;
+  let selectedLabel = null;
+
+  function selectQty(el) {
+    document.querySelectorAll('.qty-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedQty   = el.dataset.qty;
+    selectedPrice = el.dataset.price;
+    selectedLabel = el.querySelector('.qty-label').textContent;
+    document.getElementById('btn-step1').disabled = false;
+  }
+
+  function updateSummary() {
+    const label = selectedLabel + ' — Nature Map-1000';
+    const price = 'R$ ' + selectedPrice;
+    document.getElementById('summary-qty-label').textContent  = label;
+    document.getElementById('summary-qty-price').textContent  = price;
+    document.getElementById('summary-total').textContent      = price;
+    document.getElementById('summary-qty-label2').textContent = label;
+    document.getElementById('summary-qty-price2').textContent = price;
+    document.getElementById('summary-total2').textContent     = price;
+  }
+
+  function goTo(step) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step-' + step).classList.add('active');
+
+    // progress dots
+    for (let i = 1; i <= 3; i++) {
+      const dot = document.getElementById('dot-' + i);
+      dot.classList.remove('active', 'done');
+      if (i < step) dot.classList.add('done');
+      else if (i === step) dot.classList.add('active');
+    }
+
+    if (step === 2 || step === 3) updateSummary();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function maskCep(el) {
+    let v = el.value.replace(/\D/g, '').slice(0, 8);
+    if (v.length > 5) v = v.slice(0,5) + '-' + v.slice(5);
+    el.value = v;
+  }
+
+  function maskPhone(el) {
+    let v = el.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 10) v = '(' + v.slice(0,2) + ') ' + v.slice(2,7) + '-' + v.slice(7);
+    else if (v.length > 6) v = '(' + v.slice(0,2) + ') ' + v.slice(2,6) + '-' + v.slice(6);
+    else if (v.length > 2) v = '(' + v.slice(0,2) + ') ' + v.slice(2);
+    else if (v.length > 0) v = '(' + v;
+    el.value = v;
+  }
+
+  function finalizar() {
+    window.location.href = 'https://PLACEHOLDER_CHECKOUT_LINK';
+  }
+</script>
+</body>
+</html>
