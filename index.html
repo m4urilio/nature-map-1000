@@ -342,6 +342,96 @@
   .step { display: none; }
   .step.active { display: block; }
 
+  /* QUIZ */
+  #quiz-screen { width: 100%; max-width: 520px; margin: 20px 20px 40px; }
+  .quiz-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 32px 28px;
+  }
+  .quiz-progress-bar {
+    height: 6px;
+    background: var(--gray-mid);
+    border-radius: 99px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .quiz-progress-fill {
+    height: 100%;
+    background: var(--purple);
+    border-radius: 99px;
+    transition: width .4s ease;
+  }
+  .quiz-counter {
+    font-size: .78rem;
+    color: var(--gray);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .quiz-question {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.45;
+    margin-bottom: 28px;
+  }
+  .quiz-btns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .quiz-btn {
+    padding: 14px;
+    border-radius: 10px;
+    font-size: .95rem;
+    font-weight: 700;
+    border: 2px solid var(--border);
+    background: var(--white);
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+  }
+  .quiz-btn:hover { border-color: var(--purple); color: var(--purple); }
+  .quiz-btn.sim  { border-color: var(--purple); background: var(--purple-light); color: var(--purple); }
+  .quiz-btn.nao  { border-color: var(--gray-mid); color: var(--gray); }
+
+  /* RESULT */
+  .result-icon {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .result-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text);
+    text-align: center;
+    margin-bottom: 10px;
+    line-height: 1.35;
+  }
+  .result-highlight {
+    color: var(--purple);
+  }
+  .result-desc {
+    font-size: .9rem;
+    color: var(--text-mid);
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .result-badge {
+    background: #FFF3CD;
+    border: 1.5px solid #F5C842;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: .88rem;
+    color: #7A5A00;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
   @media (max-width: 480px) {
     .card { padding: 24px 18px; margin: 16px 12px 32px; }
     .qty-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -355,8 +445,31 @@
   <img src="img/imagens%20frascos/Screenshot_42.png" alt="Nature Map-1000" style="height:48px;object-fit:contain;">
 </header>
 
+<!-- QUIZ -->
+<div id="quiz-screen">
+  <div class="quiz-card">
+    <div class="quiz-progress-bar">
+      <div class="quiz-progress-fill" id="quiz-fill" style="width:10%"></div>
+    </div>
+    <div class="quiz-counter" id="quiz-counter">Pergunta 1 de 10</div>
+    <div class="quiz-question" id="quiz-question"></div>
+    <div class="quiz-btns" id="quiz-btns">
+      <button class="quiz-btn sim" onclick="answerQuiz()">Sim</button>
+      <button class="quiz-btn nao" onclick="answerQuiz()">Não</button>
+    </div>
+    <!-- RESULT (hidden initially) -->
+    <div id="quiz-result" style="display:none">
+      <div class="result-icon">⚠️</div>
+      <div class="result-title">Suas respostas indicam sinais de <span class="result-highlight">baixa testosterona</span> e disfunção erétil</div>
+      <div class="result-desc">Esses sintomas são mais comuns do que parecem — e têm solução. Com a abordagem certa, é possível recuperar sua energia, libido e performance.</div>
+      <div class="result-badge">✅ O <strong>Nature Map-1000</strong> pode ajudar a reverter esse problema!<br>Formulado com ativos naturais que atuam diretamente na produção de testosterona e circulação sanguínea.</div>
+      <button class="btn-green" onclick="startOrder()">Quero reverter isso agora</button>
+    </div>
+  </div>
+</div>
+
 <!-- PROGRESS BAR -->
-<div class="progress-wrap">
+<div class="progress-wrap" id="order-progress" style="display:none">
   <div class="progress-steps">
     <div class="step-dot active" id="dot-1">
       <div class="dot">1</div>
@@ -374,7 +487,7 @@
 </div>
 
 <!-- CARD -->
-<div class="card">
+<div class="card" id="order-card" style="display:none">
 
   <!-- STEP 1: QUANTIDADE -->
   <div class="step active" id="step-1">
@@ -496,6 +609,50 @@
 </div><!-- /card -->
 
 <script>
+  // QUIZ
+  const questions = [
+    'Você tem dificuldade em ter ou manter uma ereção satisfatória?',
+    'Seu desejo sexual diminuiu nos últimos meses?',
+    'Você acorda sem ereção matinal com frequência?',
+    'Você se sente constantemente cansado, mesmo dormindo bem?',
+    'Percebe queda na massa muscular sem mudar sua rotina?',
+    'Tem dificuldade de concentração ou sente "névoa mental"?',
+    'Sua resistência física durante a relação sexual diminuiu?',
+    'Você sente mudanças de humor, irritabilidade ou desmotivação?',
+    'Tem mais de 35 anos e nunca verificou seus níveis de testosterona?',
+    'Já tentou soluções para esses problemas sem resultado satisfatório?',
+  ];
+  let currentQ = 0;
+
+  function renderQuestion() {
+    document.getElementById('quiz-question').textContent = questions[currentQ];
+    document.getElementById('quiz-counter').textContent = 'Pergunta ' + (currentQ + 1) + ' de ' + questions.length;
+    document.getElementById('quiz-fill').style.width = ((currentQ + 1) / questions.length * 100) + '%';
+  }
+
+  function answerQuiz() {
+    currentQ++;
+    if (currentQ < questions.length) {
+      renderQuestion();
+    } else {
+      document.getElementById('quiz-btns').style.display = 'none';
+      document.getElementById('quiz-counter').style.display = 'none';
+      document.getElementById('quiz-question').style.display = 'none';
+      document.getElementById('quiz-fill').style.width = '100%';
+      document.getElementById('quiz-result').style.display = 'block';
+    }
+  }
+
+  function startOrder() {
+    document.getElementById('quiz-screen').style.display = 'none';
+    document.getElementById('order-progress').style.display = 'block';
+    document.getElementById('order-card').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  renderQuestion();
+
+  // ORDER
   let selectedQty = null;
   let selectedPrice = null;
   let selectedPriceOld = null;
